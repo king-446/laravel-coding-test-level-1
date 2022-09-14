@@ -14,7 +14,9 @@ class EventController extends Controller
      */
     public function index()
     {
-        //
+        return view('events.index', [
+            'events' => DB::table('events')->paginate(10)
+        ]);
     }
 
     /**
@@ -24,7 +26,7 @@ class EventController extends Controller
      */
     public function create()
     {
-        //
+        return view('events.create');
     }
 
     /**
@@ -35,6 +37,21 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required'
+        ]);
+
+        $event = new Event();
+        $event->name = $request->name;
+        $event->slug = $request->slug;
+
+        $event->save();
+
+        return redirect('/events')->with('success', 'Event created successfully!');
+    }
+    
+    public function apiStore(Request $request)
+    {
         return Event::create($request->all());
     }
 
@@ -44,9 +61,9 @@ class EventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Event $event)
     {
-        //
+        return view('events.show', compact('event'));
     }
 
     /**
@@ -55,9 +72,9 @@ class EventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Event $event)
     {
-        //
+        return view('events.edit', compact('event'));
     }
 
     /**
@@ -67,7 +84,20 @@ class EventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Event $event, Request $request)
+    {
+        $request->validate([
+            'name' => 'required'
+        ]);
+        $event->name = $request->name;
+        $event->slug = $request->slug;
+
+        $event->save();
+
+        return redirect('/events')->with('success', 'Event updated successfully!');
+    }
+    
+    public function apiUpdate(Request $request, $id)
     {
         //$event = Event::findOrFail($id);
         $event = Event::find($id);
@@ -91,6 +121,13 @@ class EventController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
+    {
+        $result = Event::destroy($id);
+
+        return redirect('/events')->with('success', 'Event deleted successfully!');
+    }
+    
+    public function apiDelete($id)
     {
         $result = Event::destroy($id);
 
