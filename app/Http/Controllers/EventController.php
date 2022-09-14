@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Event;
+use App\Notifications\EventCreated;
 
 class EventController extends Controller
 {
@@ -12,7 +15,12 @@ class EventController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    
+     public function index()
     {
         return view('events.index', [
             'events' => DB::table('events')->paginate(10)
@@ -41,11 +49,15 @@ class EventController extends Controller
             'name' => 'required'
         ]);
 
-        $event = new Event();
+        /* $event = new Event();
         $event->name = $request->name;
         $event->slug = $request->slug;
 
-        $event->save();
+        $event->save(); */
+
+        Event::create($request->all());
+
+        $user = Auth::user();
 
         return redirect('/events')->with('success', 'Event created successfully!');
     }
@@ -139,5 +151,10 @@ class EventController extends Controller
         {
             return $result;
         }
+    }
+
+    public function remote()
+    {
+        return view('events.remote');
     }
 }
